@@ -46,7 +46,7 @@ public class FCommand extends CommandBase {
         }
 
         try {
-            Framign.mode =  CropMode.valueOf(args[0].toUpperCase());
+            Framign.mode = CropMode.valueOf(args[0].toUpperCase());
         } catch (IllegalArgumentException ex) {
             return;
         }
