@@ -3,9 +3,14 @@ package com.smallpufferfish.framign;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.scoreboard.Score;
+import net.minecraft.scoreboard.ScoreObjective;
+import net.minecraft.scoreboard.ScorePlayerTeam;
+import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraftforge.client.ClientCommandHandler;
+import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -16,6 +21,12 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.regex.Pattern;
+
 @Mod(   modid = Framign.MODID,
         name = Framign.MODID,
         clientSideOnly = true,
@@ -23,12 +34,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class Framign
 {
     public static final String MODID = "framign";
-    public static final String VERSION = "0.2";
+    public static final String VERSION = "0.3";
     public static CropMode mode = CropMode.NONE;
     public static boolean goingRight = false;
     public static boolean goingLeft = false;
     public static boolean goingForward = false;
-    public static boolean farming = false;
+    public static float sensitivity;
 
     @EventHandler
     public void init(FMLInitializationEvent event)
@@ -36,6 +47,7 @@ public class Framign
         MinecraftForge.EVENT_BUS.register(this);
         KeyBinds.registerKeybinds();
         ClientCommandHandler.instance.registerCommand(new FCommand());
+        sensitivity = Minecraft.getMinecraft().gameSettings.mouseSensitivity;
         System.out.println("--- framign by smallpufferfish was loaded! ---");
     }
 
@@ -50,6 +62,7 @@ public class Framign
             return;
         }
 
+        if (!Framign.isInGarden()) return;
         if (Framign.mode == null) return;
         switch (Framign.mode) {
             case MELON:
@@ -68,9 +81,9 @@ public class Framign
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) {
-            return;
-        }
+        if (event.phase != TickEvent.Phase.END) return;
+
+        if (!Framign.isInGarden()) return;
 
         Minecraft mc = Minecraft.getMinecraft();
         MovingObjectPosition target = mc.objectMouseOver;
@@ -85,5 +98,34 @@ public class Framign
                 }
             } catch (IllegalArgumentException ignored) {}
         }
+
+        if (goingRight || goingLeft || goingForward) {
+            mc.gameSettings.mouseSensitivity = -1F/3F;
+        } else {
+            mc.gameSettings.mouseSensitivity = Framign.sensitivity;
+        }
+    }
+
+    public static boolean isInGarden() {
+        List<String> lines = Framign.getScoreboardLines();
+        return lines.size() >= 5 && lines.get(4).contains("The Garde\ud83c\udf20n");
+    }
+
+    public static List<String> getScoreboardLines() {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc == null || mc.theWorld == null) return Collections.emptyList();
+        Scoreboard sb = mc.theWorld.getScoreboard();
+        if (sb == null) return Collections.emptyList();
+        ScoreObjective obj = sb.getObjectiveInDisplaySlot(1);
+        Collection<Score> scores = sb.getSortedScores(obj);
+        List<String> list = new ArrayList<>();
+        for (Score line : scores) {
+            ScorePlayerTeam team = sb.getPlayersTeam(line.getPlayerName());
+            Pattern colorStripper = Pattern.compile("(?i)§[0-9A-FK-ORZ]");
+            String cleansed1 = colorStripper.matcher(ScorePlayerTeam.formatPlayerName(team, line.getPlayerName()).trim()).replaceAll("");
+            list.add(cleansed1);
+        }
+        Collections.reverse(list);
+        return list;
     }
 }
