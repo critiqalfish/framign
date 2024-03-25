@@ -108,7 +108,10 @@ public class Framign
 
     public static boolean isInGarden() {
         List<String> lines = Framign.getScoreboardLines();
-        return lines.size() >= 5 && lines.get(4).contains("The Garde\ud83c\udf20n");
+        for (String line : lines) {
+            if (line.contains("The Garde\ud83c\udf20n") || line.contains("The Garden") || line.contains("Plot -")) return true;
+        }
+        return false;
     }
 
     public static List<String> getScoreboardLines() {
