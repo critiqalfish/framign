@@ -41,13 +41,14 @@ public class Framign
     public static boolean goingForward = false;
     public static float sensitivity;
 
+    public static boolean DEBUG = true;
+
     @EventHandler
     public void init(FMLInitializationEvent event)
     {
         MinecraftForge.EVENT_BUS.register(this);
         KeyBinds.registerKeybinds();
         ClientCommandHandler.instance.registerCommand(new FCommand());
-        sensitivity = Minecraft.getMinecraft().gameSettings.mouseSensitivity;
         System.out.println("--- framign by smallpufferfish was loaded! ---");
     }
 
@@ -62,7 +63,10 @@ public class Framign
             return;
         }
 
-        if (!Framign.isInGarden()) return;
+        if (!DEBUG) {
+            if (!Framign.isInGarden()) return;
+        }
+
         if (Framign.mode == null) return;
         switch (Framign.mode) {
             case MELON:
@@ -83,7 +87,9 @@ public class Framign
     public void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
 
-        if (!Framign.isInGarden()) return;
+        if (!DEBUG) {
+            if (!Framign.isInGarden()) return;
+        }
 
         Minecraft mc = Minecraft.getMinecraft();
         MovingObjectPosition target = mc.objectMouseOver;
@@ -97,6 +103,10 @@ public class Framign
                     Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("selected crop " + Framign.mode));
                 }
             } catch (IllegalArgumentException ignored) {}
+        }
+
+        if (mc.gameSettings.mouseSensitivity != -1F/3F) {
+            Framign.sensitivity = mc.gameSettings.mouseSensitivity;
         }
 
         if (goingRight || goingLeft || goingForward) {
