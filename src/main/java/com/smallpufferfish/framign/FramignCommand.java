@@ -9,9 +9,8 @@ import net.minecraft.util.ChatComponentText;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
-public class FCommand extends CommandBase {
+public class FramignCommand extends CommandBase {
     @Override
     public String getCommandName() {
         return "framign";

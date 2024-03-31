@@ -10,7 +10,6 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraftforge.client.ClientCommandHandler;
-import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -48,7 +47,7 @@ public class Framign
     {
         MinecraftForge.EVENT_BUS.register(this);
         KeyBinds.registerKeybinds();
-        ClientCommandHandler.instance.registerCommand(new FCommand());
+        ClientCommandHandler.instance.registerCommand(new FramignCommand());
         System.out.println("--- framign by smallpufferfish was loaded! ---");
     }
 
@@ -93,6 +92,17 @@ public class Framign
 
         Minecraft mc = Minecraft.getMinecraft();
         MovingObjectPosition target = mc.objectMouseOver;
+
+        // test if this gets banned first
+        /*if (mc.gameSettings.keyBindAttack.isKeyDown()) {
+            if (mc.thePlayer != null && mc.thePlayer.isSwingInProgress == false) {
+                if (target != null && target.typeOfHit == MovingObjectPosition.MovingObjectType.ENTITY) {
+                    mc.thePlayer.swingItem();
+                    mc.playerController.attackEntity(mc.thePlayer, target.entityHit);
+                }
+            }
+        }*/
+
         if (target != null && target.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
             if (mc.theWorld == null) return;
             IBlockState blockState = mc.theWorld.getBlockState(target.getBlockPos());
